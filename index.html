@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW Garage Pro</title>
+    <style>
+        :root {
+            /* Black Minimalist Theme */
+            --bg-color: #000000;
+            --surface-color: #111111;
+            --primary-accent: #ffffff;
+            --secondary-accent: #333333;
+            --alert-color: #ff0000;
+            --success-color: #00ff00;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border-color: #333333;
+            --red-brand: #e60012;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- UTILITIES --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 14px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            min-height: 48px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            background: var(--secondary-accent);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg-color);
+            border: none;
+        }
+
+        /* --- INPUTS --- */
+        input,
+        select {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--text-main);
+        }
+
+        /* --- OVERLAYS (Lock & Cookies) --- */
+        .full-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        #cookie-gate {
+            z-index: 11000;
+            /* Above security */
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        .security-logo {
+            font-size: 2rem;
+            font-style: italic;
+            font-weight: 900;
+            margin-bottom: 2rem;
+            letter-spacing: -1px;
+        }
+
+        .security-box {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        /* --- APP HEADER --- */
+        header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.9);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-style: italic;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* --- TABS --- */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: none;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+            font-size: 0.9rem;
+            background: var(--surface-color);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: var(--text-main);
+            color: var(--bg-color);
+            border-color: var(--text-main);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- CAMERA --- */
+        .camera-trigger {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            background: var(--surface-color);
+            display: block;
+        }
+
+        .camera-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        #preview-container {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        #preview-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* --- GRID --- */
+        .car-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .car-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .car-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background: #222;
+        }
+
+        .car-info {
+            padding: 12px;
+        }
+
+        .car-model {
+            font-weight: bold;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-main);
+        }
+
+        .car-val {
+            color: var(--success-color);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* --- STATS CARD --- */
+        .stat-card {
+            background: var(--surface-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .stat-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        .legal-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+
+        /* --- MODAL --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 12000;
+            padding: 2rem;
+            display: none;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 1. COOKIE GATE (Strict Blocking) -->
+    <div id="cookie-gate" class="full-overlay hidden">
+        <div class="security-box text-center">
+            <h2 class="mb-2">🍪 Cookies y Almacenamiento</h2>
+            <p style="color: #ccc; line-height: 1.5; margin-bottom: 2rem;">
+                Para usar <strong>HW Garage Pro</strong>, necesitamos usar el almacenamiento de tu dispositivo
+                (localStorage) para guardar tus fotos y contraseñas de forma segura.
+                <br><br>
+                Sin esto, la aplicación no puede funcionar.
+            </p>
+            <button onclick="Legal.acceptCookies()" class="btn btn-primary full-width">Aceptar y Continuar</button>
+        </div>
+    </div>
+
+    <!-- 2. SECURITY OVERLAY -->
+    <div id="security-overlay" class="full-overlay">
+        <div class="security-logo">HW GARAGE PRO</div>
+
+        <!-- SETUP MODE -->
+        <div id="setup-view" class="security-box hidden">
+            <h3 class="text-center mb-2">Crear Contraseña</h3>
+            <p class="text-center" style="color:var(--text-muted); margin-bottom: 2rem;">Protege tu colección. </p>
+            <input type="password" id="setup-pass" placeholder="Nueva contraseña" class="text-center">
+            <input type="password" id="setup-confirm" placeholder="Confirma contraseña" class="text-center">
+            <button onclick="AuthController.setupPassword()" class="btn btn-primary full-width">Establecer
+                Acceso</button>
+        </div>
+
+        <!-- LOGIN MODE -->
+        <div id="login-view" class="security-box hidden">
+            <h3 class="text-center mb-2">Bienvenido</h3>
+            <p class="text-center" style="color:var(--text-muted); margin-bottom: 2rem;">Introduce tu clave de acceso
+            </p>
+            <input type="password" id="login-pass" placeholder="******" class="text-center">
+            <div id="login-error" class="text-center hidden" style="color: var(--alert-color); margin-bottom: 1rem;">
+                Contraseña incorrecta</div>
+            <button onclick="AuthController.login()" class="btn btn-primary full-width">Desbloquear</button>
+        </div>
+    </div>
+
+    <!-- 3. MAIN APP -->
+    <div id="app-container" class="hidden">
+        <header>
+            <h1>HW Garage Pro</h1>
+            <div class="subtitle">Desarrollado por Aketza Romero Roncero</div>
+
+            <div class="tabs mt-2">
+                <button class="tab active" onclick="Router.navigate('garage')">Mi Garaje</button>
+                <button class="tab" onclick="Router.navigate('add')">Añadir</button>
+                <button class="tab" onclick="Router.navigate('stats')">Estadísticas</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- VIEW: GARAGE -->
+            <div id="view-garage" class="view-section">
+                <div class="mt-2 text-center" style="margin-bottom: 2rem;">
+                    <h2 id="total-badge" style="font-size: 3rem; color: var(--text-main);">0</h2>
+                    <span
+                        style="color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px;">Coches</span>
+                </div>
+                <div id="garage-list" class="car-grid"></div>
+            </div>
+
+            <!-- VIEW: ADD -->
+            <div id="view-add" class="view-section hidden">
+                <h2 class="mb-2">Nuevo Coche</h2>
+
+                <label class="camera-trigger">
+                    <span class="camera-icon">📷</span>
+                    <span id="upload-text">Tomar Foto</span>
+                    <input type="file" id="car-photo" accept="image/*" capture="environment" class="hidden"
+                        onchange="Garage.handleImage(this)">
+                </label>
+
+                <div id="preview-container">
+                    <img id="preview-img" src="">
+                </div>
+
+                <input type="text" id="inp-model" placeholder="Nombre del Modelo">
+                <input type="text" id="inp-series" placeholder="Serie (ej. HW Art Cars)">
+                <input type="text" id="inp-series-num" placeholder="Número (ej. 1/10 o 145/250)">
+
+                <div class="flex-row">
+                    <div class="flex-1">
+                        <label style="font-size: 0.8rem; color: #888; margin-left: 5px;">Precio Compra (€)</label>
+                        <input type="number" id="inp-price" placeholder="0.00">
+                    </div>
+                    <div class="flex-1">
+                        <label style="font-size: 0.8rem; color: #888; margin-left: 5px;">Valor Actual (€)</label>
+                        <input type="number" id="inp-value" placeholder="0.00">
+                    </div>
+                </div>
+
+                <button onclick="Garage.addCar()" class="btn btn-primary full-width mt-2">Guardar</button>
+            </div>
+
+            <!-- VIEW: STATS -->
+            <div id="view-stats" class="view-section hidden">
+                <h2 class="mb-2">Panel Financiero</h2>
+
+                <div class="stat-card">
+                    <div class="stat-label">Valor Total del Garaje</div>
+                    <div class="stat-value" id="stat-total-val">0.00 €</div>
+                </div>
+
+                <div class="flex-row">
+                    <div class="stat-card flex-1">
+                        <div class="stat-label">Inversión</div>
+                        <div class="stat-value" id="stat-invested" style="font-size: 1.5rem;">0.00 €</div>
+                    </div>
+                    <div class="stat-card flex-1">
+                        <div class="stat-label">Balance</div>
+                        <div class="stat-value" id="stat-balance" style="font-size: 1.5rem;">0.00 €</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div style="margin-bottom: 10px; font-weight: bold;">Desarrollado por Aketza Romero Roncero</div>
+            <div class="legal-links">
+                <a href="#" onclick="Legal.openPrivacy()">Política de Privacidad</a>
+            </div>
+            <p class="mt-2" style="opacity: 0.5;">Tus datos se guardan localmente.</p>
+        </footer>
+    </div>
+
+    <!-- PRIVACY MODAL -->
+    <div id="privacy-modal" class="modal">
+        <div class="security-box"
+            style="margin: 0 auto; background: var(--surface-color); padding: 20px; border-radius: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Política de Privacidad</h3>
+                <span onclick="Legal.closePrivacy()" style="font-size: 24px; cursor: pointer;">&times;</span>
+            </div>
+            <p style="line-height: 1.6; color: #ccc;">
+                <strong>Aketza Romero Roncero</strong> respeta tu privacidad.
+                <br><br>
+                1. <strong>Almacenamiento Local:</strong> Todas las fotos, nombres de modelos y precios se guardan
+                exclusivamente en el almacenamiento (LocalStorage) de tu navegador.
+                <br><br>
+                2. <strong>Sin Servidores:</strong> No enviamos ninguna información a servidores externos. Tú tienes el
+                control total de tus datos.
+                <br><br>
+                3. <strong>Seguridad:</strong> La contraseña de acceso es para evitar miradas indiscretas en tu
+                dispositivo, pero recuerda que si borras los datos de navegación, se perderá tu colección.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS ---
+        const KEYS = {
+            AUTH: 'hw_auth_v1',
+            DATA: 'hw_data_v1',
+            CONSENT: 'hw_consent_v1'
+        };
+
+        // --- AUTH CONTROLLER ---
+        const AuthController = {
+            init: function () {
+                // 1. Check Cookies Consent First
+                if (!localStorage.getItem(KEYS.CONSENT)) {
+                    document.getElementById('cookie-gate').classList.remove('hidden');
+                    return; // Stop here until accepted
+                }
+
+                // 2. Check Auth
+                const storedPass = localStorage.getItem(KEYS.AUTH);
+                if (!storedPass) {
+                    document.getElementById('setup-view').classList.remove('hidden');
+                } else {
+                    document.getElementById('login-view').classList.remove('hidden');
+                }
+            },
+
+            setupPassword: function () {
+                const p1 = document.getElementById('setup-pass').value;
+                const p2 = document.getElementById('setup-confirm').value;
+                if (p1.length < 4) return alert("Mínimo 4 caracteres");
+                if (p1 !== p2) return alert("Las contraseñas no coinciden");
+
+                localStorage.setItem(KEYS.AUTH, p1);
+                this.unlock();
+            },
+
+            login: function () {
+                const input = document.getElementById('login-pass').value;
+                if (input === localStorage.getItem(KEYS.AUTH)) {
+                    this.unlock();
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            },
+
+            unlock: function () {
+                document.getElementById('security-overlay').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                Garage.init();
+            }
+        };
+
+        // --- LEGAL CONTROLLER ---
+        const Legal = {
+            acceptCookies: function () {
+                localStorage.setItem(KEYS.CONSENT, 'true');
+                document.getElementById('cookie-gate').classList.add('hidden');
+                // Resume Auth Flow
+                AuthController.init();
+            },
+            openPrivacy: () => document.getElementById('privacy-modal').style.display = 'block',
+            closePrivacy: () => document.getElementById('privacy-modal').style.display = 'none'
+        };
+
+        // --- GARAGE LOGIC ---
+        const Garage = {
+            collection: [],
+
+            init: function () {
+                const data = localStorage.getItem(KEYS.DATA);
+                if (data) this.collection = JSON.parse(data);
+                this.renderList();
+                this.renderStats();
+            },
+
+            save: function () {
+                try {
+                    localStorage.setItem(KEYS.DATA, JSON.stringify(this.collection));
+                    this.renderList(); // Update UI
+                    this.renderStats(); // Update UI
+                } catch (e) {
+                    alert("¡Memoria llena! Intenta fotos más pequeñas.");
+                }
+            },
+
+            handleImage: function (input) {
+                if (input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('preview-img').src = e.target.result;
+                        document.getElementById('preview-container').style.display = 'block';
+                        document.getElementById('upload-text').innerText = "Cambiar Foto";
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            },
+
+            addCar: function () {
+                const model = document.getElementById('inp-model').value;
+                const series = document.getElementById('inp-series').value;
+                const seriesNum = document.getElementById('inp-series-num').value;
+                const price = parseFloat(document.getElementById('inp-price').value) || 0;
+                const value = parseFloat(document.getElementById('inp-value').value) || 0;
+                const img = document.getElementById('preview-img').src;
+
+                if (!model) return alert("Escribe el nombre del modelo");
+
+                this.collection.unshift({
+                    id: Date.now(),
+                    model, series, seriesNum, price, value,
+                    image: img.includes('data:') ? img : null
+                });
+
+                this.save();
+
+                // Clear Form
+                document.getElementById('inp-model').value = '';
+                document.getElementById('inp-series').value = '';
+                document.getElementById('inp-series-num').value = '';
+                document.getElementById('inp-price').value = '';
+                document.getElementById('inp-value').value = '';
+                document.getElementById('preview-container').style.display = 'none';
+                document.getElementById('preview-img').src = '';
+                Router.navigate('garage');
+            },
+
+            deleteCar: function (id) {
+                if (confirm("¿Borrar coche?")) {
+                    this.collection = this.collection.filter(c => c.id !== id);
+                    this.save();
+                }
+            },
+
+            renderList: function () {
+                const grid = document.getElementById('garage-list');
+                document.getElementById('total-badge').innerText = this.collection.length;
+                grid.innerHTML = '';
+
+                this.collection.forEach(c => {
+                    const img = c.image || 'https://via.placeholder.com/300x200/333/888?text=Sin+Foto';
+                    grid.innerHTML += `
+                        <div class="car-card">
+                            <button class="delete-btn" onclick="Garage.deleteCar(${c.id})">&times;</button>
+                            <img src="${img}" class="car-img" loading="lazy">
+                            <div class="car-info">
+                                <div class="car-model">${c.model}</div>
+                                <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 2px;">${c.series || ''} ${c.seriesNum ? '#' + c.seriesNum : ''}</div>
+                                <div style="font-size: 0.8rem; color: #888;">Inv: ${c.price.toFixed(2)}€</div>
+                                <div class="car-val">Valor: ${c.value.toFixed(2)}€</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            },
+
+            renderStats: function () {
+                let totalInv = 0;
+                let totalVal = 0;
+
+                this.collection.forEach(c => {
+                    totalInv += c.price;
+                    totalVal += c.value;
+                });
+
+                const balance = totalVal - totalInv;
+                const balanceEl = document.getElementById('stat-balance');
+
+                document.getElementById('stat-total-val').innerText = totalVal.toFixed(2) + ' €';
+                document.getElementById('stat-invested').innerText = totalInv.toFixed(2) + ' €';
+
+                balanceEl.innerText = (balance > 0 ? '+' : '') + balance.toFixed(2) + ' €';
+                balanceEl.style.color = balance >= 0 ? 'var(--success-color)' : 'var(--alert-color)';
+            }
+        };
+
+        // --- ROUTER ---
+        const Router = {
+            navigate: function (view) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`view-${view}`).classList.remove('hidden');
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                const idx = view === 'garage' ? 0 : view === 'add' ? 1 : 2;
+                document.querySelectorAll('.tab')[idx].classList.add('active');
+            }
+        };
+
+        // --- BOOTSTRAP ---
+        window.addEventListener('DOMContentLoaded', () => AuthController.init());
+    </script>
+</body>
+
+</html>
